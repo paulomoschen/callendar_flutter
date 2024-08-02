@@ -1,9 +1,30 @@
-import 'package:callander_flutter/tarefa_model.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-class TarefaBloc {
-  final teste = BehaviorSubject<TarefaModel>();
-  Stream<TarefaModel> get outTeste => teste.stream;
-  Function(TarefaModel) get changeTeste => teste.sink.add;
-  TarefaModel get getTeste => teste.value;
+class TarefaBloc extends ChangeNotifier {
+
+  final dataController = TextEditingController();
+  final startTimeController = TextEditingController();
+  final endTimeController = TextEditingController();
+  final descricaoController = TextEditingController();
+
+  final isMonthOrDay = BehaviorSubject<bool>();
+  Stream<bool> get outIsMonthOrDay => isMonthOrDay.stream;
+  Function(bool) get changeIsMonthOrDay => isMonthOrDay.sink.add;
+  bool get getIsMonthOrDay => isMonthOrDay.value;
+
+  TarefaBloc({required BuildContext context}) {
+    isMonthOrDay.add(false);
+  }
+
+  @override
+  void dispose() {
+    isMonthOrDay.close();
+
+    dataController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    descricaoController.dispose();
+    super.dispose();
+  }
 }
