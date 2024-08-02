@@ -1,3 +1,5 @@
+import 'package:callander_flutter/cadastro_tarefa.dart';
+import 'package:callander_flutter/tarefa_bloc.dart';
 import 'package:callander_flutter/tarefa_data_source.dart';
 import 'package:callander_flutter/tarefa_model.dart';
 import 'package:flutter/material.dart';
@@ -12,14 +14,20 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   final CalendarController _calendarController = CalendarController();
+  late TarefaBloc tarefaBloc = TarefaBloc(context: context);
+
+  @override
+  void initState() {
+    tarefaBloc = TarefaBloc(context: context);
+    super.initState();
+  }
 
   List<TarefaModel> _getDataSource() {
     final List<TarefaModel> tarefaList = <TarefaModel>[];
-    final DateTime today = DateTime.now();
-    final DateTime startTime = DateTime(today.year, today.month, today.day, 9);
-    final DateTime endTime = startTime.add(const Duration(hours: 2));
+    final DateTime startTime = DateTime.utc(2024, 7, 19, 9);
+    final DateTime endTime = DateTime.utc(2024, 7, 19, 11);
     tarefaList.add(TarefaModel(
-        'Lavar o carro', startTime, endTime, const Color(0xFF0F8644), true));
+        'Lavar o carro', startTime, endTime, const Color(0xFF0F8644), false));
     return tarefaList;
   }
 
@@ -36,16 +44,34 @@ class _CalendarPageState extends State<CalendarPage> {
         onTap: (calendarTapDetails) {
           if (_calendarController.view == CalendarView.month) {
             _calendarController.view = CalendarView.day;
+            tarefaBloc.changeIsMonthOrDay(true);
           }
         },
         controller: _calendarController,
         monthViewSettings: const MonthViewSettings(
             appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _calendarController.view = CalendarView.month,
-        child: const Icon(Icons.arrow_back),
-      ),
+      floatingActionButton: StreamBuilder<bool>(
+          stream: tarefaBloc.outIsMonthOrDay,
+          builder: (context, snapshot) {
+            return FloatingActionButton(
+              onPressed: () {
+                if (tarefaBloc.getIsMonthOrDay) {
+                  _calendarController.view = CalendarView.month;
+                  tarefaBloc.changeIsMonthOrDay(false);
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CadastroTarefaPage()),
+                  );
+                }
+              },
+              child: Icon(
+                tarefaBloc.getIsMonthOrDay ? Icons.arrow_back : Icons.add,
+              ),
+            );
+          }),
     );
   }
 }

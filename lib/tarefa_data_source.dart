@@ -9,12 +9,12 @@ class TarefaDataSource extends CalendarDataSource {
 
   @override
   DateTime getStartTime(int index) {
-    return _getTarefaData(index).dia;
+    return _getTarefaData(index).startTime;
   }
 
   @override
   DateTime getEndTime(int index) {
-    return _getTarefaData(index).tempoTarefa;
+    return _getTarefaData(index).endTime;
   }
 
   @override
