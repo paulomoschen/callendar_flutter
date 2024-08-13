@@ -1,7 +1,7 @@
-import 'package:callander_flutter/cadastro_tarefa.dart';
-import 'package:callander_flutter/tarefa_bloc.dart';
-import 'package:callander_flutter/tarefa_data_source.dart';
-import 'package:callander_flutter/tarefa_model.dart';
+import 'package:callander_flutter/screen/cadastro_tarefa.dart';
+import 'package:callander_flutter/bloc/tarefa_bloc.dart';
+import 'package:callander_flutter/model/tarefa_data_source.dart';
+import 'package:callander_flutter/model/tarefa_model.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -24,8 +24,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   List<TarefaModel> _getDataSource() {
     final List<TarefaModel> tarefaList = <TarefaModel>[];
-    final DateTime startTime = DateTime.utc(2024, 7, 19, 9);
-    final DateTime endTime = DateTime.utc(2024, 7, 19, 11);
+    final DateTime startTime = DateTime.utc(2024, 7, 19, 00, 30);
+    final DateTime endTime = DateTime.utc(2024, 7, 19, 2, 30);
     tarefaList.add(TarefaModel(
         'Lavar o carro', startTime, endTime, const Color(0xFF0F8644), false));
     return tarefaList;

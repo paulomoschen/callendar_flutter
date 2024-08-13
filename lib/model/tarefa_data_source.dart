@@ -1,4 +1,4 @@
-import 'package:callander_flutter/tarefa_model.dart';
+import 'package:callander_flutter/model/tarefa_model.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 

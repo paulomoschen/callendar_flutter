@@ -13,13 +13,20 @@ class TarefaBloc extends ChangeNotifier {
   Function(bool) get changeIsMonthOrDay => isMonthOrDay.sink.add;
   bool get getIsMonthOrDay => isMonthOrDay.value;
 
+  final isDone = BehaviorSubject<bool>();
+  Stream<bool> get outIsDone => isDone.stream;
+  Function(bool) get changeIsDone => isDone.sink.add;
+  bool get getIsDone => isDone.value;
+
   TarefaBloc({required BuildContext context}) {
     isMonthOrDay.add(false);
+    isDone.add(false);
   }
 
   @override
   void dispose() {
     isMonthOrDay.close();
+    isDone.close();
 
     dataController.dispose();
     startTimeController.dispose();
