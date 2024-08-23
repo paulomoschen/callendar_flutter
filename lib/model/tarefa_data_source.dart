@@ -24,12 +24,12 @@ class TarefaDataSource extends CalendarDataSource {
 
   @override
   Color getColor(int index) {
-    return _getTarefaData(index).background;
+    return _getTarefaData(index).background!;
   }
 
   @override
   bool isAllDay(int index) {
-    return _getTarefaData(index).isAllDay;
+    return _getTarefaData(index).isAllDay!;
   }
 
   TarefaModel _getTarefaData(int index) {

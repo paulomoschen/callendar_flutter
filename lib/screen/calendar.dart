@@ -1,7 +1,7 @@
-import 'package:callander_flutter/screen/cadastro_tarefa.dart';
 import 'package:callander_flutter/bloc/tarefa_bloc.dart';
 import 'package:callander_flutter/model/tarefa_data_source.dart';
 import 'package:callander_flutter/model/tarefa_model.dart';
+import 'package:callander_flutter/screen/cadastro_tarefa.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -15,20 +15,17 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   final CalendarController _calendarController = CalendarController();
   late TarefaBloc tarefaBloc = TarefaBloc(context: context);
+  List<TarefaModel>? tarefaList;
 
   @override
   void initState() {
     tarefaBloc = TarefaBloc(context: context);
+    _getTarefas();
     super.initState();
   }
 
-  List<TarefaModel> _getDataSource() {
-    final List<TarefaModel> tarefaList = <TarefaModel>[];
-    final DateTime startTime = DateTime.utc(2024, 7, 19, 00, 30);
-    final DateTime endTime = DateTime.utc(2024, 7, 19, 2, 30);
-    tarefaList.add(TarefaModel(
-        'Lavar o carro', startTime, endTime, const Color(0xFF0F8644), false));
-    return tarefaList;
+  _getTarefas() async {
+    tarefaBloc.changeTarefaList(await tarefaBloc.getTarefa());
   }
 
   @override
@@ -38,19 +35,24 @@ class _CalendarPageState extends State<CalendarPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Calendário"),
       ),
-      body: SfCalendar(
-        view: CalendarView.month,
-        dataSource: TarefaDataSource(_getDataSource()),
-        onTap: (calendarTapDetails) {
-          if (_calendarController.view == CalendarView.month) {
-            _calendarController.view = CalendarView.day;
-            tarefaBloc.changeIsMonthOrDay(true);
-          }
-        },
-        controller: _calendarController,
-        monthViewSettings: const MonthViewSettings(
-            appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
-      ),
+      body: StreamBuilder(
+          stream: tarefaBloc.outTarefaList,
+          builder: (context, snapshot) {
+            return SfCalendar(
+              view: CalendarView.month,
+              dataSource: TarefaDataSource(tarefaBloc.getTarefaList),
+              onTap: (calendarTapDetails) {
+                if (_calendarController.view == CalendarView.month) {
+                  _calendarController.view = CalendarView.day;
+                  tarefaBloc.changeIsMonthOrDay(true);
+                }
+              },
+              controller: _calendarController,
+              monthViewSettings: const MonthViewSettings(
+                appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+              ),
+            );
+          }),
       floatingActionButton: StreamBuilder<bool>(
           stream: tarefaBloc.outIsMonthOrDay,
           builder: (context, snapshot) {
@@ -60,11 +62,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   _calendarController.view = CalendarView.month;
                   tarefaBloc.changeIsMonthOrDay(false);
                 } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CadastroTarefaPage()),
-                  );
+                  showAddUpdateTarefaModal(
+                      context: context, tarefaBloc: tarefaBloc);
                 }
               },
               child: Icon(
