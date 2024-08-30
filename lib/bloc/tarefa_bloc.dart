@@ -1,15 +1,9 @@
 import 'package:callander_flutter/model/tarefa_db.dart';
 import 'package:callander_flutter/model/tarefa_model.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 
 class TarefaBloc extends ChangeNotifier {
-  final dataController = TextEditingController();
-  final startTimeController = TextEditingController();
-  final endTimeController = TextEditingController();
-  final descricaoController = TextEditingController();
-
   late AppDatabase _appDatabase;
 
   final tarefaList = BehaviorSubject<List<TarefaModel>>();
@@ -35,36 +29,21 @@ class TarefaBloc extends ChangeNotifier {
     _appDatabase = AppDatabase();
   }
 
-  getTarefa() async {
+  Future<List<TarefaModel>> getTarefa() async {
     List<TarefaModel> tarefaList = await _appDatabase.getTarefa();
     return tarefaList.isEmpty ? [] : tarefaList;
   }
 
-  Future<bool> insertTarefa({TarefaModel? tarefaEdit}) async {
-    try {
-      String startAux = "${dataController.text} ${startTimeController.text}";
-      DateTime dataTarefa = DateFormat("dd/MM/yyyy HH:mm").parse(startAux);
-
-      String endAux = "${dataController.text} ${endTimeController.text}";
-      DateTime endTarefa = DateFormat("dd/MM/yyyy HH:mm").parse(endAux);
-
-      TarefaModel tarefa = TarefaModel(
-        id: "0",
-        descricao: descricaoController.text,
-        startTime: dataTarefa,
-        endTime: endTarefa,
-        isDone: getIsDone,
-        dateCreate: DateTime.now(),
-        dateUpdate: DateTime.now(),
-      );
-
-      if (tarefaEdit == null) {
-        await _appDatabase.insertTarefa(tarefa);
-      }
-      return true;
-    } catch (e) {
-      return false;
+  insertOrUpdateTarefa({required TarefaModel tarefa}) async {
+    if (tarefa.id == "0") {
+      _appDatabase.insertTarefa(tarefa);
+    } else {
+      return _appDatabase.updateTarefa(tarefa);
     }
+  }
+
+  void deleteTarefa({required TarefaModel tarefa}) async {
+    await _appDatabase.deleteTarefa(int.parse(tarefa.id));
   }
 
   @override
@@ -74,10 +53,6 @@ class TarefaBloc extends ChangeNotifier {
     isDone.close();
     _appDatabase.close();
 
-    dataController.dispose();
-    startTimeController.dispose();
-    endTimeController.dispose();
-    descricaoController.dispose();
     super.dispose();
   }
 }

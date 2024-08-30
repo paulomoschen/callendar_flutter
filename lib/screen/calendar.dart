@@ -17,15 +17,18 @@ class _CalendarPageState extends State<CalendarPage> {
   late TarefaBloc tarefaBloc = TarefaBloc(context: context);
   List<TarefaModel>? tarefaList;
 
+  Future<bool>? future;
+
   @override
   void initState() {
     tarefaBloc = TarefaBloc(context: context);
-    _getTarefas();
+    future = getTarefas();
     super.initState();
   }
 
-  _getTarefas() async {
+  Future<bool> getTarefas() async {
     tarefaBloc.changeTarefaList(await tarefaBloc.getTarefa());
+    return true;
   }
 
   @override
@@ -38,20 +41,39 @@ class _CalendarPageState extends State<CalendarPage> {
       body: StreamBuilder(
           stream: tarefaBloc.outTarefaList,
           builder: (context, snapshot) {
-            return SfCalendar(
-              view: CalendarView.month,
-              dataSource: TarefaDataSource(tarefaBloc.getTarefaList),
-              onTap: (calendarTapDetails) {
-                if (_calendarController.view == CalendarView.month) {
-                  _calendarController.view = CalendarView.day;
-                  tarefaBloc.changeIsMonthOrDay(true);
-                }
-              },
-              controller: _calendarController,
-              monthViewSettings: const MonthViewSettings(
-                appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
-              ),
-            );
+            return FutureBuilder(
+                future: future,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.hasData && snapshot.data!) {
+                    return SfCalendar(
+                      view: CalendarView.month,
+                      dataSource: TarefaDataSource(tarefaBloc.getTarefaList),
+                      onTap: (calendarTapDetails) {
+                        if (_calendarController.view == CalendarView.month) {
+                          _calendarController.view = CalendarView.day;
+                          tarefaBloc.changeIsMonthOrDay(true);
+                        } else if (calendarTapDetails.appointments != null &&
+                            calendarTapDetails.appointments!.length == 1) {
+                          final TarefaModel tarefaDetails =
+                              calendarTapDetails.appointments![0];
+                          showAddUpdateTarefaModal(
+                            context: context,
+                            onRefresh: getTarefas,
+                            tarefaBloc: tarefaBloc,
+                            tarefaEdit: tarefaDetails,
+                          );
+                        }
+                      },
+                      controller: _calendarController,
+                      monthViewSettings: const MonthViewSettings(
+                        appointmentDisplayMode:
+                            MonthAppointmentDisplayMode.appointment,
+                      ),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                });
           }),
       floatingActionButton: StreamBuilder<bool>(
           stream: tarefaBloc.outIsMonthOrDay,
@@ -63,7 +85,10 @@ class _CalendarPageState extends State<CalendarPage> {
                   tarefaBloc.changeIsMonthOrDay(false);
                 } else {
                   showAddUpdateTarefaModal(
-                      context: context, tarefaBloc: tarefaBloc);
+                    context: context,
+                    onRefresh: getTarefas,
+                    tarefaBloc: tarefaBloc,
+                  );
                 }
               },
               child: Icon(

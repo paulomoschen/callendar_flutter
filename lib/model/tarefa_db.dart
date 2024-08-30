@@ -11,7 +11,7 @@ part "tarefa_db.g.dart";
 
 class TarefaTable extends Table {
   IntColumn get id => integer().named("id").autoIncrement()();
-  TextColumn get name => text().named("descricao").withLength(min: 4, max: 30)();
+  TextColumn get name => text().named("descricao").withLength(min: 1, max: 30)();
   DateTimeColumn get startTime => dateTime().named("startTime")();
   DateTimeColumn get endTime => dateTime().named("endTime")();
   BoolColumn get isDone => boolean().named('isDone')();
